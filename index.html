@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DNS Pulse</title>
+  <meta name="description" content="Compare public DNS-over-HTTPS resolvers from your browser." />
+  <meta name="author" content="DNS Pulse contributors" />
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="./" aria-label="DNS Pulse home">
+      <img src="assets/logo.svg" alt="" />
+      <span>
+        <strong>DNS Pulse</strong>
+        <small>Browser DoH benchmark</small>
+      </span>
+    </a>
+
+    <nav class="header-actions" aria-label="Actions">
+      <button id="settingsBtn" class="icon-button" type="button" aria-label="Open settings" title="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M19.4 13.5a7.9 7.9 0 0 0 .1-1.5 7.9 7.9 0 0 0-.1-1.5l2-1.5-2-3.5-2.4 1a8 8 0 0 0-2.6-1.5L14 2h-4l-.4 2.5A8 8 0 0 0 7 6L4.6 5 2.6 8.5l2 1.5a7.9 7.9 0 0 0-.1 1.5 7.9 7.9 0 0 0 .1 1.5l-2 1.5 2 3.5 2.4-1a8 8 0 0 0 2.6 1.5L10 22h4l.4-2.5A8 8 0 0 0 17 18l2.4 1 2-3.5-2-1.5ZM12 15.2A3.2 3.2 0 1 1 12 8.8a3.2 3.2 0 0 1 0 6.4Z"/>
+        </svg>
+      </button>
+      <button id="themeToggle" class="icon-button" type="button" aria-label="Toggle theme" title="Toggle theme">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 14.6A8.4 8.4 0 0 1 9.4 3 8.8 8.8 0 1 0 21 14.6Z"/>
+        </svg>
+      </button>
+      <button id="runTestBtn" class="run-button" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 5v14l11-7Z"/>
+        </svg>
+        <span>Start test</span>
+      </button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="console">
+      <div class="console-copy">
+        <p class="eyebrow">Resolver timing from your current route</p>
+        <h1>Find the resolver that responds fastest on your network.</h1>
+        <div class="mobile-run-row">
+          <button id="mobileRunTestBtn" class="run-button hero-run-button" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5v14l11-7Z"/>
+            </svg>
+            <span>Start test</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="connection-grid" aria-label="Connection details">
+        <div>
+          <span>Provider</span>
+          <strong id="ispName">Detecting...</strong>
+        </div>
+        <div>
+          <span>Network</span>
+          <strong id="connectionMeta">Checking public IP and location</strong>
+        </div>
+        <div>
+          <span>Plan</span>
+          <strong id="testPlan">-</strong>
+        </div>
+      </div>
+
+      <div id="progressWrap" class="progress-wrap hidden" aria-live="polite">
+        <div class="progress-info">
+          <span id="progressText">Preparing benchmark</span>
+          <span id="progressCount"></span>
+        </div>
+        <div class="progress-track">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="summarySection" class="summary-board hidden" aria-label="Benchmark summary">
+      <article class="winner-card">
+        <span>Recommended resolver</span>
+        <strong id="bestDnsName">-</strong>
+        <p id="bestDnsDetails">-</p>
+      </article>
+      <article>
+        <span>Average</span>
+        <strong id="bestDnsAvg">-</strong>
+        <p>Penalty included</p>
+      </article>
+      <article>
+        <span>Reliability</span>
+        <strong id="bestDnsReliability">-</strong>
+        <p>Successful samples</p>
+      </article>
+    </section>
+
+    <section id="analysisSection" class="analysis-band hidden">
+      <svg viewBox="0 0 72 36" aria-hidden="true">
+        <path d="M4 22h12l6-13 10 23 8-17h28" />
+      </svg>
+      <p id="finalAnalysisText"></p>
+    </section>
+
+    <section class="layout">
+      <div id="drawerOverlay" class="drawer-overlay hidden"></div>
+      <aside id="settingsDrawer" class="test-card settings-drawer" aria-label="Settings">
+        <div class="drawer-header">
+          <div>
+            <h2>Settings</h2>
+            <p>Change the benchmark inputs.</p>
+          </div>
+          <button id="closeSettingsBtn" class="icon-button" type="button" aria-label="Close settings" title="Close settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 6l12 12M18 6 6 18"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="section-title">
+          <h2>Test matrix</h2>
+          <p>Each resolver is checked against popular websites across multiple rounds.</p>
+        </div>
+        <dl class="test-stats">
+          <div>
+            <dt>Resolvers</dt>
+            <dd id="providerCount">0</dd>
+          </div>
+          <div>
+            <dt>Hostnames</dt>
+            <dd id="domainCount">0</dd>
+          </div>
+          <div>
+            <dt>Rounds</dt>
+            <dd id="roundCount">0</dd>
+          </div>
+        </dl>
+
+        <div class="settings-tabs" role="tablist" aria-label="Settings">
+          <button id="hostsTab" class="settings-tab active" type="button" data-settings-tab="hosts">Test hosts</button>
+          <button id="serversTab" class="settings-tab" type="button" data-settings-tab="servers">DoH servers</button>
+        </div>
+
+        <div id="hostsPanel" class="manager-block settings-panel">
+          <div class="manager-heading">
+            <div>
+              <h3>Test hosts</h3>
+              <p>Add sites you use often, or remove any default host.</p>
+            </div>
+            <button id="resetHostsBtn" class="mini-button" type="button">Reset</button>
+          </div>
+          <div id="websiteChips" class="managed-list"></div>
+          <form id="hostForm" class="inline-form">
+            <input id="hostInput" type="text" autocomplete="off" placeholder="claude.ai or https://example.com" />
+            <button type="submit">Add</button>
+          </form>
+        </div>
+
+        <div id="serversPanel" class="manager-block settings-panel hidden">
+          <div class="manager-heading">
+            <div>
+              <h3>DoH servers</h3>
+              <p>Custom resolvers are included in the next run.</p>
+            </div>
+            <button id="resetProvidersBtn" class="mini-button" type="button">Reset</button>
+          </div>
+          <div id="providerList" class="managed-list"></div>
+          <form id="providerForm" class="stack-form" novalidate>
+            <input id="providerNameInput" type="text" autocomplete="off" placeholder="Server name" />
+            <div class="inline-form">
+              <input id="providerUrlInput" type="text" autocomplete="off" placeholder="dns.example.com/dns-query" />
+              <button type="submit">Add</button>
+            </div>
+          </form>
+        </div>
+
+      </aside>
+
+      <section class="results-panel">
+        <div class="section-title results-title">
+          <div>
+            <h2>Resolvers</h2>
+            <p id="runNote">No benchmark has been run yet.</p>
+          </div>
+          <button id="resetBtn" class="text-button" type="button">Reset</button>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+          <svg viewBox="0 0 160 80" aria-hidden="true">
+            <path d="M10 46h22l10-24 18 47 14-34h76" />
+            <circle cx="10" cy="46" r="5" />
+            <circle cx="150" cy="35" r="5" />
+          </svg>
+          <strong>Ready</strong>
+          <p>For a cleaner comparison, close heavy downloads and avoid switching VPN or networks while the test runs.</p>
+        </div>
+
+        <div id="resultsSection" class="results-wrap hidden">
+          <div id="resultsList" class="results-list"></div>
+        </div>
+      </section>
+    </section>
+
+    <details class="info-panel">
+      <summary>
+        <h2>How this test works</h2>
+        <span>View details</span>
+      </summary>
+      <p class="info-intro">No data is collected by this app. Requests go directly from your browser to the selected public DNS-over-HTTPS resolvers.</p>
+      <div class="info-grid">
+        <article>
+          <h3>Preparation</h3>
+          <p>The app first prepares resolver connections so the measured run is less affected by first-request setup cost.</p>
+        </article>
+        <article>
+          <h3>Measurement</h3>
+          <p>Each resolver is checked against every hostname across multiple rounds using browser <code>fetch</code> and high-resolution timing.</p>
+        </article>
+        <article>
+          <h3>Timeouts</h3>
+          <p>Requests that fail or exceed the limit are counted as failed samples and scored with a 5000 ms penalty.</p>
+        </article>
+        <article>
+          <h3>Variability</h3>
+          <p>VPNs, mobile networks, browser extensions, routing, and resolver load can change results. Run more than once before changing DNS settings.</p>
+        </article>
+      </div>
+    </details>
+  </main>
+
+  <footer>
+    <p>Results are browser DoH timings, not raw UDP DNS latency. Routing, VPN, CORS policy, and resolver load can change the ranking.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
