@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sivarayala7.github.io/dns-pulse/sitemap.xml
